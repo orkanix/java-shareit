@@ -17,6 +17,7 @@ import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.exceptions.UserNotFound;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -77,7 +78,7 @@ public class ItemServiceImpl implements ItemService {
         if (item.isEmpty()) {
             throw new ItemNotFound("Вещь не найдена");
         }
-        if (item.get().getOwner() != userId) {
+        if (!Objects.equals(item.get().getOwner(), userId)) {
             throw new InvalidItemOwner("Владелец вещи и пользователь не совпадают");
         }
 
