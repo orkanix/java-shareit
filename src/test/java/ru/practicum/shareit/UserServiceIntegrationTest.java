@@ -1,8 +1,6 @@
 package ru.practicum.shareit;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.user.dto.NewUserDto;
@@ -14,7 +12,6 @@ import ru.practicum.shareit.user.service.UserService;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserServiceIntegrationTest {
 
     @Autowired
@@ -22,13 +19,21 @@ public class UserServiceIntegrationTest {
 
     private UserDto savedUser;
 
-    @BeforeAll
+    @BeforeEach
     void initAll() {
         NewUserDto newUserDto = NewUserDto.builder()
                 .name("User")
                 .email("user@mail.ru")
                 .build();
         savedUser = userService.createUser(newUserDto);
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (savedUser != null) {
+            userService.deleteUser(savedUser.getId());
+            savedUser = null;
+        }
     }
 
     @Test
@@ -51,8 +56,8 @@ public class UserServiceIntegrationTest {
         UserDto userDto = userService.getUserById(savedUser.getId());
 
         assertNotNull(userDto);
-        assertEquals("UpdatedUser", userDto.getName());
-        assertEquals("updateduser@mail.ru", userDto.getEmail());
+        assertEquals(savedUser.getName(), userDto.getName());
+        assertEquals(savedUser.getEmail(), userDto.getEmail());
     }
 
     @Test
@@ -70,7 +75,6 @@ public class UserServiceIntegrationTest {
 
     @Test
     void testDeleteUser() {
-        // Создаем пользователя для удаления
         NewUserDto newUserDto = NewUserDto.builder()
                 .name("ToDelete")
                 .email("todelete@mail.ru")
@@ -79,10 +83,8 @@ public class UserServiceIntegrationTest {
         UserDto userToDelete = userService.createUser(newUserDto);
         Long idToDelete = userToDelete.getId();
 
-        // Удаляем
         userService.deleteUser(idToDelete);
 
-        // Проверяем, что пользователь удалён - должен выбросить исключение
         assertThrows(UserNotFound.class, () -> userService.getUserById(idToDelete));
     }
 }
