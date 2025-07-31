@@ -41,6 +41,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getItems(Long userId) {
         log.info("Получение всех вещей с id владельца: {}", userId);
+        if (!userRepository.exists(userId)) {
+            throw new UserNotFound("Пользователь не найден");
+        }
         return itemRepository.findUserItems(userId).stream()
                 .map(ItemMapper::mapToItemDto)
                 .toList();
@@ -72,11 +75,11 @@ public class ItemServiceImpl implements ItemService {
         log.info("Обновляю вещь пользователя с id: {}", userId);
         Optional<Item> item = itemRepository.findItemById(itemId);
 
-        if (!userRepository.exists(userId)) {
-            throw new UserNotFound("Пользователь не найден");
-        }
         if (item.isEmpty()) {
             throw new ItemNotFound("Вещь не найдена");
+        }
+        if (!userRepository.exists(userId)) {
+            throw new UserNotFound("Пользователь не найден");
         }
         if (!Objects.equals(item.get().getOwner(), userId)) {
             throw new InvalidItemOwner("Владелец вещи и пользователь не совпадают");

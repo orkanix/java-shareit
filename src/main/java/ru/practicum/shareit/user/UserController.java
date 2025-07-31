@@ -37,5 +37,3 @@ public class UserController {
         userService.deleteUser(userId);
     }
 }
-
-//доделать обновление пользователя, далее item

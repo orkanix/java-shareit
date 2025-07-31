@@ -2,14 +2,14 @@ package ru.practicum.shareit.item.dao;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+@Component
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ItemRepositoryImpl implements ItemRepository {
     final HashMap<Long, Item> items = new HashMap<>();

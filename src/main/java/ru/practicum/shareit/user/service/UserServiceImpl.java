@@ -48,7 +48,8 @@ public class UserServiceImpl implements UserService {
         log.info("Обновление пользователя с id: {}", id);
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFound("Пользователь не найден"));
 
-        if (updateUserDto.getEmail() != null) {
+        if (updateUserDto.hasEmail()
+                && !updateUserDto.getEmail().equals(user.getEmail())) {
             userRepository.findByEmail(updateUserDto.getEmail())
                     .filter(u -> !u.getId().equals(id))
                     .ifPresent(u -> {
