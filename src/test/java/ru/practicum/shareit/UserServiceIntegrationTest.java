@@ -20,13 +20,15 @@ public class UserServiceIntegrationTest {
     private UserDto savedUser;
 
     @BeforeEach
-    void initAll() {
+    void setUp() {
+        String uniqueEmail = "user" + System.currentTimeMillis() + "@mail.ru";
         NewUserDto newUserDto = NewUserDto.builder()
                 .name("User")
-                .email("user@mail.ru")
+                .email(uniqueEmail)
                 .build();
         savedUser = userService.createUser(newUserDto);
     }
+
 
     @AfterEach
     void tearDown() {
