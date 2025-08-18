@@ -1,16 +1,9 @@
+version: '3.8'
+
 services:
-  db:
-    image: postgres:16.1
+  shareit-server:
+    build: .
     ports:
-      - "5433:5432"
-    volumes:
-      - ./volumes/postgres:/var/lib/postgresql/data/
+      - "8080:8080"
     environment:
-      - POSTGRES_DB=shareit
-      - POSTGRES_USER=shareit
-      - POSTGRES_PASSWORD=12345
-    healthcheck:
-      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-      timeout: 5s
-      interval: 5s
-      retries: 10
+      - SPRING_PROFILES_ACTIVE=test
