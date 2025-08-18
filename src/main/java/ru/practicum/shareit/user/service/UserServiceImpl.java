@@ -12,8 +12,6 @@ import ru.practicum.shareit.user.exceptions.UserAlreadyExists;
 import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Optional;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -23,19 +21,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserById(Long id) {
         log.info("Поиск пользователя с id: {}", id);
-        Optional<User> user = userRepository.findById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFound("Пользователь не найден"));
 
-        if  (user.isEmpty()) {
-            throw new UserNotFound("Пользователь не найден");
-        }
-
-        return UserMapper.mapToUserDto(user.get());
+        return UserMapper.mapToUserDto(user);
     }
 
     @Override
     public UserDto createUser(NewUserDto newUserDto) {
         log.info("Сохранение пользователя с email: {}",  newUserDto.getEmail());
-        if (userRepository.emailExists(newUserDto.getEmail())) {
+        if (userRepository.existsByEmail(newUserDto.getEmail())) {
             throw new UserAlreadyExists(newUserDto.getEmail());
         }
 
@@ -59,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
         User updatedUser = UserMapper.updateUserFields(user, updateUserDto);
 
-        updatedUser = userRepository.update(updatedUser);
+        updatedUser = userRepository.save(updatedUser);
         return UserMapper.mapToUserDto(updatedUser);
     }
 
@@ -67,7 +62,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
         log.info("Удаление пользователя с id: {}", id);
-        userRepository.delete(id);
+        userRepository.delete(userRepository.findById(id).get());
         log.info("Успешное удаление пользователя с id: {}", id);
     }
 }
