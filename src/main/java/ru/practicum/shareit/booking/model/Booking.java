@@ -1,15 +1,15 @@
 package ru.practicum.shareit.booking.model;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "bookings")

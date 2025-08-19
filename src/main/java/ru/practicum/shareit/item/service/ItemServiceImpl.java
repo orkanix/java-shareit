@@ -100,7 +100,7 @@ public class ItemServiceImpl implements ItemService {
         if (text.isBlank()) {
             return List.of();
         }
-        return itemRepository.findByNameContainingIgnoreCaseAndAvailableTrue(text).stream()
+        return itemRepository.search(text).stream()
                 .map(ItemMapper::mapToItemDto)
                 .toList();
     }
@@ -108,10 +108,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto createItem(NewItemDto newItemDto, Long ownerId) {
         log.info("Сохраняю вещь владельца с id: {}", ownerId);
-        if (!userRepository.existsById(ownerId)) {
-            throw new UserNotFound("Пользователь не найден");
-        }
-        Item item = itemRepository.save(ItemMapper.mapToItem(newItemDto, userRepository.findById(ownerId).get()));
+        User user = userRepository.findById(ownerId)
+                .orElseThrow(() -> new UserNotFound("Пользователь не найден"));
+        Item item = itemRepository.save(ItemMapper.mapToItem(newItemDto, user));
         return ItemMapper.mapToItemDto(item);
     }
 
@@ -129,7 +128,6 @@ public class ItemServiceImpl implements ItemService {
         }
 
         Item itemUpdated = ItemMapper.updateItemFields(item, updateItemDto);
-        log.info("успешно1");
         return ItemMapper.mapToItemDto(itemRepository.save(itemUpdated));
     }
 
@@ -143,13 +141,11 @@ public class ItemServiceImpl implements ItemService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFound("Пользователь не найден"));
 
-        boolean hasBooking = bookingRepository.existsByItem_IdAndBooker_IdAndEndBefore(itemId, userId, now);
-        if (!hasBooking) {
+        if (!bookingRepository.existsByItem_IdAndBooker_IdAndEndBefore(itemId, userId, now)) {
             throw new CommentBadRequest("Не удалось сохранить комментарий");
         }
 
         Comment comment = commentRepository.save(CommentMapper.mapToComment(newCommentDto, item, user));
         return CommentMapper.mapToCommentDto(comment);
     }
-
 }

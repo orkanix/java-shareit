@@ -40,7 +40,7 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDto createItem(@Valid @RequestBody NewItemDto newItemDto, @RequestHeader("X-Sharer-User-Id") Long ownerId) {
+    public ItemDto createItem(@RequestBody @Valid NewItemDto newItemDto, @RequestHeader("X-Sharer-User-Id") Long ownerId) {
         return itemService.createItem(newItemDto, ownerId);
     }
 
@@ -50,7 +50,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment(@RequestBody NewCommentDto newCommentDto, @PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id")  Long userId) {
+    public CommentDto createComment(@RequestBody @Valid NewCommentDto newCommentDto, @PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id")  Long userId) {
         return itemService.createComment(newCommentDto, itemId, userId);
     }
 }
