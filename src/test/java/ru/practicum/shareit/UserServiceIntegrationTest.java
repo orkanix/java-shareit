@@ -1,8 +1,10 @@
 package ru.practicum.shareit;
 
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import ru.practicum.shareit.user.dto.NewUserDto;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -12,6 +14,8 @@ import ru.practicum.shareit.user.service.UserService;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserServiceIntegrationTest {
 
     @Autowired
@@ -21,10 +25,11 @@ public class UserServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        String uniqueEmail = "user" + System.currentTimeMillis() + "@mail.ru";
+        String email = "user" + System.currentTimeMillis() + "@mail.ru";
+
         NewUserDto newUserDto = NewUserDto.builder()
                 .name("User")
-                .email(uniqueEmail)
+                .email(email)
                 .build();
         savedUser = userService.createUser(newUserDto);
     }
@@ -39,10 +44,11 @@ public class UserServiceIntegrationTest {
     }
 
     @Test
+    @Transactional
     void testCreateUser() {
         NewUserDto newUserDto = NewUserDto.builder()
                 .name("TestUser")
-                .email("testuser@mail.ru")
+                .email("testuser" + System.currentTimeMillis() + "@mail.ru")
                 .build();
 
         UserDto createdUser = userService.createUser(newUserDto);
@@ -54,6 +60,7 @@ public class UserServiceIntegrationTest {
     }
 
     @Test
+    @Transactional
     void testGetUserById() {
         UserDto userDto = userService.getUserById(savedUser.getId());
 
@@ -63,6 +70,7 @@ public class UserServiceIntegrationTest {
     }
 
     @Test
+    @Transactional
     void testUpdateUser() {
         UpdateUserDto updateUserDto = UpdateUserDto.builder()
                 .name("UpdatedUser")
@@ -76,10 +84,11 @@ public class UserServiceIntegrationTest {
     }
 
     @Test
+    @Transactional
     void testDeleteUser() {
         NewUserDto newUserDto = NewUserDto.builder()
                 .name("ToDelete")
-                .email("todelete@mail.ru")
+                .email("todelete" + System.currentTimeMillis() + "@mail.ru")
                 .build();
 
         UserDto userToDelete = userService.createUser(newUserDto);

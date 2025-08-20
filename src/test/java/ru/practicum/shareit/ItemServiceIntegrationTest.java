@@ -1,11 +1,13 @@
 package ru.practicum.shareit;
 
-import org.junit.jupiter.api.BeforeAll;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import ru.practicum.shareit.item.dto.ItemBookingsDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.NewItemDto;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
@@ -17,6 +19,7 @@ import ru.practicum.shareit.item.service.ItemService;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ItemServiceIntegrationTest {
 
@@ -29,17 +32,17 @@ public class ItemServiceIntegrationTest {
 	private UserDto savedUser;
 	private ItemDto savedItemDto;
 
-	@BeforeAll
-	void initAll() {
-		NewUserDto newUserDto = NewUserDto.builder()
-				.name("User")
-				.email("user@mail.ru")
-				.build();
-		savedUser = userService.createUser(newUserDto);
-	}
-
 	@BeforeEach
 	void setUp() {
+		String email = "user" + System.currentTimeMillis() + "@mail.ru";
+
+		NewUserDto newUserDto = NewUserDto.builder()
+				.name("User")
+				.email(email)
+				.build();
+
+		savedUser = userService.createUser(newUserDto);
+
 		NewItemDto newItemDto = NewItemDto.builder()
 				.name("TestName")
 				.description("TestDescription")
@@ -50,6 +53,7 @@ public class ItemServiceIntegrationTest {
 	}
 
 	@Test
+	@Transactional
 	void testCreateItem() {
 		NewItemDto newItemDto = NewItemDto.builder()
 				.name("CreateTestName")
@@ -67,8 +71,9 @@ public class ItemServiceIntegrationTest {
 	}
 
 	@Test
+	@Transactional
 	void testGetItem() {
-		ItemDto itemDto = itemService.getItem(savedItemDto.getId());
+		ItemBookingsDto itemDto = itemService.getItem(savedItemDto.getId());
 
 		assertNotNull(itemDto);
 		assertEquals("TestName", itemDto.getName());
@@ -77,6 +82,7 @@ public class ItemServiceIntegrationTest {
 	}
 
 	@Test
+	@Transactional
 	void testUpdateItem() {
 		UpdateItemDto updateItemDto = UpdateItemDto.builder()
 				.name("UpdatedName")
