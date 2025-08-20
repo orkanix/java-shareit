@@ -120,7 +120,7 @@ public class BookingServiceImpl implements BookingService {
             case FUTURE -> bookingRepository.findAllByItem_Owner_IdAndStartAfter(ownerId, now, newestFirst);
             case WAITING -> bookingRepository.findAllByStatusAndItem_Owner_Id(BookingStatus.WAITING, ownerId, newestFirst);
             case REJECTED -> bookingRepository.findAllByStatusAndItem_Owner_Id(BookingStatus.REJECTED, ownerId, newestFirst);
-            default -> bookingRepository.findAllByItem_Owner_Id(ownerId, newestFirst);
+            case ALL -> bookingRepository.findAllByItem_Owner_Id(ownerId, newestFirst);
         };
 
         return bookings.stream()

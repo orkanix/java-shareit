@@ -17,6 +17,7 @@ public class NewBookingDto {
     Long itemId;
 
     @NotNull(message = "Время начала аренды не может быть пустым")
+    @Future(message = "Время начала аренды должно быть в будущем")
     LocalDateTime start;
 
     @NotNull(message = "Время конца аренды не может быть пустым")
