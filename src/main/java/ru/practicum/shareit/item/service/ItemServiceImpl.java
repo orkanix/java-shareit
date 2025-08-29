@@ -15,6 +15,9 @@ import ru.practicum.shareit.item.exceptions.CommentBadRequest;
 import ru.practicum.shareit.item.exceptions.InvalidItemOwner;
 import ru.practicum.shareit.item.exceptions.ItemNotFound;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.dao.ItemRequestRepository;
+import ru.practicum.shareit.request.exceptions.ItemRequestNotFound;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentMapper;
@@ -27,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -37,6 +41,7 @@ public class ItemServiceImpl implements ItemService {
     final UserRepository userRepository;
     final BookingRepository bookingRepository;
     final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     public ItemBookingsDto getItem(Long itemId) {
@@ -110,7 +115,13 @@ public class ItemServiceImpl implements ItemService {
         log.info("Сохраняю вещь владельца с id: {}", ownerId);
         User user = userRepository.findById(ownerId)
                 .orElseThrow(() -> new UserNotFound("Пользователь не найден"));
-        Item item = itemRepository.save(ItemMapper.mapToItem(newItemDto, user));
+        if (newItemDto.getRequestId() != null) {
+            ItemRequest itemRequest = itemRequestRepository.findById(newItemDto.getRequestId())
+                    .orElseThrow(() -> new ItemRequestNotFound("Запрос не найден"));
+            Item item = itemRepository.save(ItemMapper.mapToItem(newItemDto, user, itemRequest));
+            return ItemMapper.mapToItemDto(item);
+        }
+        Item item = itemRepository.save(ItemMapper.mapToItem(newItemDto, user, null));
         return ItemMapper.mapToItemDto(item);
     }
 

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.dao;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,4 +17,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "AND (LOWER(i.name) LIKE LOWER(CONCAT('%', :text, '%')) " +
             "OR LOWER(i.description) LIKE LOWER(CONCAT('%', :text, '%')))")
     List<Item> search(@Param("text") String text);
+
+    List<Item> findAllByIdIn(List<Long> requestIds);
 }

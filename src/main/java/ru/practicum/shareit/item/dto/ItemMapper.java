@@ -6,6 +6,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestMapper;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
@@ -25,12 +26,13 @@ public class ItemMapper {
         );
     }
 
-    public static Item mapToItem(NewItemDto newItemDto, User user) {
+    public static Item mapToItem(NewItemDto newItemDto, User user, ItemRequest itemRequest) {
         Item item = new Item();
         item.setName(newItemDto.getName());
         item.setDescription(newItemDto.getDescription());
         item.setAvailable(newItemDto.getAvailable());
         item.setOwner(user);
+        item.setRequest(itemRequest);
         return item;
     }
 
@@ -60,5 +62,13 @@ public class ItemMapper {
                 .nextBooking(nextBooking != null ? BookingMapper.mapToBookingDto(nextBooking) : null)
                 .comments(comments.stream().map(comment -> CommentMapper.mapToCommentDto(comment)).collect(Collectors.toList()))
                 .build();
+    }
+
+    public static AnswerDto mapToAnswerDto(Item item) {
+        return new AnswerDto(
+                item.getId(),
+                "",
+                item.getOwner().getId()
+        );
     }
 }

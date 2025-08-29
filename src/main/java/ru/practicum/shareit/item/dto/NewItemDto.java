@@ -17,4 +17,5 @@ public class NewItemDto {
     String description;
     @NotNull(message = "Доступность не может быть не заполнена")
     Boolean available;
+    Long requestId;
 }

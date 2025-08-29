@@ -16,7 +16,6 @@ import ru.practicum.shareit.item.dto.NewCommentDto;
 
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
