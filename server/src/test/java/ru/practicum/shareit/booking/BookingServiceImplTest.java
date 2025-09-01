@@ -130,6 +130,37 @@ class BookingServiceImplTest {
         verify(userRepository, times(6)).findById(1L);
     }
 
+    @Test
+    void getUserBookings_allStates() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+
+        when(bookingRepository.findAllByBookerAndStartBeforeAndEndAfter(any(), any(), any(), any()))
+                .thenReturn(List.of(booking));
+        when(bookingRepository.findAllByBookerAndEndBefore(any(), any(), any()))
+                .thenReturn(List.of(booking));
+        when(bookingRepository.findAllByBookerAndStartAfter(any(), any(), any()))
+                .thenReturn(List.of(booking));
+        when(bookingRepository.findAllByStatusAndBooker(eq(BookingStatus.WAITING), any(), any()))
+                .thenReturn(List.of(booking));
+        when(bookingRepository.findAllByStatusAndBooker(eq(BookingStatus.REJECTED), any(), any()))
+                .thenReturn(List.of(booking));
+        when(bookingRepository.findAllByBooker(any(), any()))
+                .thenReturn(List.of(booking));
+
+        List<BookingDto> current = bookingService.getUserBookings("CURRENT", 1L);
+        List<BookingDto> past = bookingService.getUserBookings("PAST", 1L);
+        List<BookingDto> future = bookingService.getUserBookings("FUTURE", 1L);
+        List<BookingDto> waiting = bookingService.getUserBookings("WAITING", 1L);
+        List<BookingDto> rejected = bookingService.getUserBookings("REJECTED", 1L);
+        List<BookingDto> all = bookingService.getUserBookings("ALL", 1L);
+
+        assertEquals(1, current.size());
+        assertEquals(1, past.size());
+        assertEquals(1, future.size());
+        assertEquals(1, waiting.size());
+        assertEquals(1, rejected.size());
+        assertEquals(1, all.size());
+    }
 
     @Test
     void getOwnerBookings_success() {
