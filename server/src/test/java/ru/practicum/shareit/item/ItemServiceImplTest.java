@@ -6,6 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.dao.BookingRepository;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.dao.CommentRepository;
 import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.dto.*;
@@ -16,7 +18,11 @@ import ru.practicum.shareit.item.exceptions.ItemNotFound;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.request.dao.ItemRequestRepository;
+import ru.practicum.shareit.request.exceptions.ItemRequestNotFound;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.dao.UserRepository;
+import ru.practicum.shareit.user.exceptions.UserNotFound;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -40,6 +46,9 @@ class ItemServiceImplTest {
 
     @Mock
     private BookingRepository bookingRepository;
+
+    @Mock
+    private ItemRequestRepository itemRequestRepository;
 
     @Mock
     private CommentRepository commentRepository;
@@ -181,6 +190,34 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void createItem_withRequestId_success() {
+        newItemDto.setRequestId(10L);
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setId(10L);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+        when(itemRequestRepository.findById(10L)).thenReturn(Optional.of(itemRequest));
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
+
+        ItemDto result = itemService.createItem(newItemDto, 1L);
+
+        assertNotNull(result);
+        assertEquals(item.getName(), result.getName());
+        verify(itemRepository).save(any(Item.class));
+    }
+
+    @Test
+    void createItem_withRequestId_requestNotFound() {
+        newItemDto.setRequestId(10L);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+        when(itemRequestRepository.findById(10L)).thenReturn(Optional.empty());
+
+        assertThrows(ItemRequestNotFound.class, () -> itemService.createItem(newItemDto, 1L));
+    }
+
+
+    @Test
     void createComment_throwsCommentBadRequest() {
         NewCommentDto newCommentDto = new NewCommentDto("Bad comment");
 
@@ -225,5 +262,44 @@ class ItemServiceImplTest {
                     itemService.createItem(unavailableItemDto, 1L);
                 });
     }
+
+    @Test
+    void updateItem_userNotFound() {
+        UpdateItemDto updateItemDto = UpdateItemDto.builder()
+                .name("UpdatedItem")
+                .description("UpdatedDescription")
+                .available(true)
+                .build();
+
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+        when(userRepository.existsById(2L)).thenReturn(false);
+
+        assertThrows(UserNotFound.class, () -> itemService.updateItem(updateItemDto, 2L, item.getId()));
+    }
+
+    @Test
+    void getItem_noBookingsMeetCriteria() {
+        Booking b1 = new Booking();
+        b1.setItem(item);
+        b1.setStart(LocalDateTime.now().minusDays(2));
+        b1.setEnd(LocalDateTime.now().minusDays(1));
+        b1.setStatus(BookingStatus.WAITING);
+
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        when(bookingRepository.findAllByItem_Id(1L)).thenReturn(List.of(b1));
+        when(commentRepository.findAllByItem_Id(1L)).thenReturn(List.of());
+
+        ItemBookingsDto result = itemService.getItem(1L);
+        assertNull(result.getLastBooking());
+        assertNull(result.getNextBooking());
+    }
+
+    @Test
+    void getItems_userNotFound() {
+        when(userRepository.existsById(1L)).thenReturn(false);
+
+        assertThrows(UserNotFound.class, () -> itemService.getItems(1L));
+    }
+
 
 }

@@ -110,4 +110,51 @@ class UserServiceImplTest {
 
         verify(userRepository).delete(user);
     }
+
+    @Test
+    void updateUser_success() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(updateUserDto.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserDto updated = userService.updateUser(user.getId(), updateUserDto);
+
+        assertNotNull(updated);
+        assertEquals("Johnny", updated.getName());
+        assertEquals("johnny@mail.com", updated.getEmail());
+    }
+
+    @Test
+    void updateUser_emailAlreadyExists() {
+        User anotherUser = new User();
+        anotherUser.setId(2L);
+        anotherUser.setEmail("johnny@mail.com");
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(updateUserDto.getEmail())).thenReturn(Optional.of(anotherUser));
+
+        assertThrows(UserAlreadyExists.class,
+                () -> userService.updateUser(user.getId(), updateUserDto));
+    }
+
+    @Test
+    void updateUser_userNotFound() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFound.class,
+                () -> userService.updateUser(1L, updateUserDto));
+    }
+
+    @Test
+    void updateUser_emailChanged_conflict_throwsException() {
+        User anotherUser = new User();
+        anotherUser.setId(2L);
+        anotherUser.setEmail(updateUserDto.getEmail());
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(updateUserDto.getEmail())).thenReturn(Optional.of(anotherUser));
+
+        assertThrows(UserAlreadyExists.class, () -> userService.updateUser(user.getId(), updateUserDto));
+    }
+
 }

@@ -13,6 +13,7 @@ import ru.practicum.shareit.booking.exception.BookingNotFound;
 import ru.practicum.shareit.booking.exception.UserNotForbidden;
 import ru.practicum.shareit.booking.exception.UserNotItemOwner;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStates;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.dao.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
@@ -104,6 +105,33 @@ class BookingServiceImplTest {
     }
 
     @Test
+    void getOwnerBookings_allStatesCovered() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+
+        when(bookingRepository.findAllByItem_Owner_IdAndStartBeforeAndEndAfter(anyLong(), any(), any(), any()))
+                .thenReturn(List.of(booking));
+        when(bookingRepository.findAllByItem_Owner_IdAndEndBefore(anyLong(), any(), any()))
+                .thenReturn(List.of(booking));
+        when(bookingRepository.findAllByItem_Owner_IdAndStartAfter(anyLong(), any(), any()))
+                .thenReturn(List.of(booking));
+        when(bookingRepository.findAllByStatusAndItem_Owner_Id(eq(BookingStatus.WAITING), anyLong(), any()))
+                .thenReturn(List.of(booking));
+        when(bookingRepository.findAllByStatusAndItem_Owner_Id(eq(BookingStatus.REJECTED), anyLong(), any()))
+                .thenReturn(List.of(booking));
+        when(bookingRepository.findAllByItem_Owner_Id(anyLong(), any()))
+                .thenReturn(List.of(booking));
+
+        for (BookingStates state : BookingStates.values()) {
+            List<BookingDto> result = bookingService.getOwnerBookings(state.name(), 1L);
+            assertEquals(1, result.size());
+            assertEquals(booking.getId(), result.get(0).getId());
+        }
+
+        verify(userRepository, times(6)).findById(1L);
+    }
+
+
+    @Test
     void getOwnerBookings_success() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findAllByItem_Owner_Id(1L, Sort.by(Sort.Direction.DESC, "start")))
@@ -122,9 +150,8 @@ class BookingServiceImplTest {
 
     @Test
     void approveBooking_throwsUserNotItemOwner() {
-        // booker — это владелец item в твоем setUp
         User stranger = new User();
-        stranger.setId(2L); // другой пользователь
+        stranger.setId(2L);
         when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
         when(userRepository.findById(2L)).thenReturn(Optional.of(stranger));
 
@@ -135,7 +162,7 @@ class BookingServiceImplTest {
     @Test
     void getBooking_throwsUserNotForbidden() {
         User stranger = new User();
-        stranger.setId(3L); // пользователь, не владелец и не бронирующий
+        stranger.setId(3L);
         when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
         when(userRepository.findById(3L)).thenReturn(Optional.of(stranger));
 
