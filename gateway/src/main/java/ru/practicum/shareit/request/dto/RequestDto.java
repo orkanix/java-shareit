@@ -12,8 +12,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CommentRequestDto {
-    @NotBlank(message = "Текст комментария не может быть пустым")
-    @Size(max = 255, message = "Количество символов в комментарии должно быть до 255")
-    String text;
+public class RequestDto {
+    @NotBlank(message = "Описание запрос не может быть пустым")
+    @Size(max = 255, message = "Размер описания не более 255 символов")
+    String description;
 }

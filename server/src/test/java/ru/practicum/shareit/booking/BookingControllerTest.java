@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingDto;
+import ru.practicum.shareit.booking.model.BookingStates;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -95,7 +96,7 @@ class BookingControllerTest {
 
     @Test
     void getUserBookings_success() throws Exception {
-        when(bookingService.getUserBookings(anyString(), anyLong()))
+        when(bookingService.getUserBookings(any(BookingStates.class), anyLong()))
                 .thenReturn(List.of(bookingDto));
 
         mockMvc.perform(get("/bookings")
@@ -107,7 +108,7 @@ class BookingControllerTest {
 
     @Test
     void getOwnerBookings_success() throws Exception {
-        when(bookingService.getOwnerBookings(anyString(), anyLong()))
+        when(bookingService.getOwnerBookings(any(BookingStates.class), anyLong()))
                 .thenReturn(List.of(bookingDto));
 
         mockMvc.perform(get("/bookings/owner")
@@ -116,4 +117,5 @@ class BookingControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(bookingDto.getId()));
     }
+
 }

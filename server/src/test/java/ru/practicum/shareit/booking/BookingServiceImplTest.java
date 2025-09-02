@@ -91,7 +91,7 @@ class BookingServiceImplTest {
         when(bookingRepository.findAllByBookerAndStartAfter(eq(booker), any(), eq(newestFirst)))
                 .thenReturn(List.of(booking));
 
-        assertEquals(1, bookingService.getUserBookings("FUTURE", booker.getId()).size());
+        assertEquals(1, bookingService.getUserBookings(BookingStates.FUTURE, booker.getId()).size());
     }
 
     @Test
@@ -122,7 +122,7 @@ class BookingServiceImplTest {
                 .thenReturn(List.of(booking));
 
         for (BookingStates state : BookingStates.values()) {
-            List<BookingDto> result = bookingService.getOwnerBookings(state.name(), 1L);
+            List<BookingDto> result = bookingService.getOwnerBookings(state, 1L);
             assertEquals(1, result.size());
             assertEquals(booking.getId(), result.get(0).getId());
         }
@@ -147,12 +147,12 @@ class BookingServiceImplTest {
         when(bookingRepository.findAllByBooker(any(), any()))
                 .thenReturn(List.of(booking));
 
-        List<BookingDto> current = bookingService.getUserBookings("CURRENT", 1L);
-        List<BookingDto> past = bookingService.getUserBookings("PAST", 1L);
-        List<BookingDto> future = bookingService.getUserBookings("FUTURE", 1L);
-        List<BookingDto> waiting = bookingService.getUserBookings("WAITING", 1L);
-        List<BookingDto> rejected = bookingService.getUserBookings("REJECTED", 1L);
-        List<BookingDto> all = bookingService.getUserBookings("ALL", 1L);
+        List<BookingDto> current = bookingService.getUserBookings(BookingStates.CURRENT, 1L);
+        List<BookingDto> past = bookingService.getUserBookings(BookingStates.PAST, 1L);
+        List<BookingDto> future = bookingService.getUserBookings(BookingStates.FUTURE, 1L);
+        List<BookingDto> waiting = bookingService.getUserBookings(BookingStates.WAITING, 1L);
+        List<BookingDto> rejected = bookingService.getUserBookings(BookingStates.REJECTED, 1L);
+        List<BookingDto> all = bookingService.getUserBookings(BookingStates.ALL, 1L);
 
         assertEquals(1, current.size());
         assertEquals(1, past.size());
@@ -168,7 +168,7 @@ class BookingServiceImplTest {
         when(bookingRepository.findAllByItem_Owner_Id(1L, Sort.by(Sort.Direction.DESC, "start")))
                 .thenReturn(List.of(booking));
 
-        List<BookingDto> result = bookingService.getOwnerBookings("ALL", 1L);
+        List<BookingDto> result = bookingService.getOwnerBookings(BookingStates.ALL, 1L);
 
         assertNotNull(result);
         assertEquals(1, result.size());

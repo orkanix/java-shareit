@@ -84,15 +84,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getUserBookings(String state, Long userId) {
+    public List<BookingDto> getUserBookings(BookingStates state, Long userId) {
         log.info("Получаю все бронирования пользователя с id: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFound("Пользователь не найден"));
 
-        BookingStates bookingState = BookingStates.valueOf(state.toUpperCase());
         LocalDateTime now = LocalDateTime.now();
 
-        List<Booking> bookings = switch (bookingState) {
+        List<Booking> bookings = switch (state) {
             case CURRENT -> bookingRepository.findAllByBookerAndStartBeforeAndEndAfter(user, now, now, newestFirst);
             case PAST -> bookingRepository.findAllByBookerAndEndBefore(user, now, newestFirst);
             case FUTURE -> bookingRepository.findAllByBookerAndStartAfter(user, now, newestFirst);
@@ -105,16 +104,15 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getOwnerBookings(String state, Long ownerId) {
+    public List<BookingDto> getOwnerBookings(BookingStates state, Long ownerId) {
         log.info("Получаю все бронирования пользователя с id: {}", ownerId);
-        BookingStates bookingState = BookingStates.valueOf(state.toUpperCase());
        userRepository.findById(ownerId)
                 .orElseThrow(() -> new UserNotFound("Пользователь не найден"));
 
         LocalDateTime now = LocalDateTime.now();
         List<Booking> bookings;
 
-        bookings = switch (bookingState) {
+        bookings = switch (state) {
             case CURRENT -> bookingRepository.findAllByItem_Owner_IdAndStartBeforeAndEndAfter(ownerId, now, now, newestFirst);
             case PAST -> bookingRepository.findAllByItem_Owner_IdAndEndBefore(ownerId, now, newestFirst);
             case FUTURE -> bookingRepository.findAllByItem_Owner_IdAndStartAfter(ownerId, now, newestFirst);

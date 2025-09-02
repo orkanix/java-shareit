@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.request.dto.IRequestDto;
+import ru.practicum.shareit.request.dto.RequestDto;
 
 @Controller
 @RequestMapping("/requests")
@@ -19,7 +19,7 @@ public class RequestController {
     private final RequestClient requestClient;
 
     @PostMapping
-    public ResponseEntity<Object> createRequest(@RequestHeader("X-Sharer-User-Id") long userId, @RequestBody @Valid IRequestDto requestDto) {
+    public ResponseEntity<Object> createRequest(@RequestHeader("X-Sharer-User-Id") long userId, @RequestBody @Valid RequestDto requestDto) {
         log.info("Creating request");
         return requestClient.createRequest(userId, requestDto);
     }
